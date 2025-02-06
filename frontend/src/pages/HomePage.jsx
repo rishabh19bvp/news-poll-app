@@ -4,12 +4,11 @@ import NewsCard from "../components/NewsCard";
 import Poll from "../components/Poll";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import profileIcon from "/assets/profile-icon.svg";
 
 const HomePage = () => {
   const [news, setNews] = useState([]);
   const [user, setUser] = useState(null);
-  const [openPoll, setOpenPoll] = useState(null); // Track which poll is open
+  const [openPoll, setOpenPoll] = useState(null); // ✅ Track which poll is open
   const navigate = useNavigate();
   const auth = getAuth();
 
@@ -25,16 +24,16 @@ const HomePage = () => {
     });
   }, [auth]);
 
+  const togglePoll = (newsId) => {
+    setOpenPoll(openPoll === newsId ? null : newsId); // ✅ Ensure only one poll opens at a time
+  };
+
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (!confirmLogout) return;
 
     await signOut(auth);
-    navigate("/auth");
-  };
-
-  const togglePoll = (newsId) => {
-    setOpenPoll(openPoll === newsId ? null : newsId);
+    navigate("/auth"); // ✅ Redirect user to login page
   };
 
   return (
@@ -56,7 +55,7 @@ const HomePage = () => {
               {/* ✅ Logout Button */}
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded"
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
               >
                 Logout
               </button>
@@ -64,7 +63,7 @@ const HomePage = () => {
           ) : (
             <button
               onClick={() => navigate("/auth")}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
             >
               Sign In
             </button>
@@ -74,13 +73,9 @@ const HomePage = () => {
         <div className="space-y-6">
           {news.map((article, index) => (
             <React.Fragment key={article._id}>
-              <NewsCard
-                article={article}
-                isPollOpen={openPoll === article._id}
-                onTogglePoll={togglePoll}
-              />
+              <NewsCard article={article} onTogglePoll={togglePoll} />
 
-              {/* ✅ Poll appears between news articles */}
+              {/* ✅ Poll should only appear BETWEEN news articles */}
               {openPoll === article._id && (
                 <div className="relative bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-md transition-all animate-slide-up">
                   <Poll pollId={article._id} />

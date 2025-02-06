@@ -7,13 +7,17 @@ router.get("/votes/:userId", async (req, res) => {
         const { userId } = req.params;
         const userVotes = await Poll.find({ "votes.userId": userId });
 
-        // ✅ Format the response to return relevant vote history
+        if (!userVotes.length) {
+            return res.status(200).json([]);
+        }
+
+        // ✅ Format response with poll questions & user choices
         const formattedVotes = userVotes.map(poll => {
             const userVote = poll.votes.find(vote => vote.userId === userId);
             return {
                 pollId: poll._id,
                 question: poll.question,
-                choice: userVote.choice,
+                choice: userVote ? userVote.choice : "Unknown",
             };
         });
 
