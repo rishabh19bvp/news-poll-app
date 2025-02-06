@@ -1,27 +1,26 @@
-require('dotenv').config();
-console.log("MongoDB URI:", process.env.MONGO_URI);
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const mongoose = require("mongoose");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const newsRoutes = require('./routes/newsRoutes');
-app.use('/api/news', newsRoutes);
+const newsRoutes = require("./routes/newsRoutes");
+const pollRoutes = require("./routes/pollRoutes");
 
-const pollRoutes = require('./routes/pollRoutes');
-app.use('/api/poll', pollRoutes);
+app.use("/api/news", newsRoutes);
+app.use("/api/poll", pollRoutes);
 
-app.get('/', (req, res) => {
-    res.send("News Poll API is running...");
+app.get("/", (req, res) => {
+  res.send("News Poll API is running...");
 });
 
-// Connect to MongoDB Atlas
+// ✅ Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log(err));
+  .then(() => console.log("✅ MongoDB Connected Successfully"))
+  .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
