@@ -9,17 +9,17 @@ const AuthPage = () => {
 
   const handleGoogleLogin = async () => {
     const user = await signInWithGoogle();
-    if (user) navigate("/profile");
+    if (user) navigate("/"); // ✅ Redirects to HomePage after login
   };
 
   const handleEmailSignUp = async () => {
     const user = await signUpWithEmail(email, password);
-    if (user) navigate("/profile");
+    if (user) navigate("/"); // ✅ Redirects to HomePage after sign-up
   };
 
   const handleEmailLogin = async () => {
     const user = await loginWithEmail(email, password);
-    if (user) navigate("/profile");
+    if (user) navigate("/"); // ✅ Redirects to HomePage after login
   };
 
   return (
@@ -29,8 +29,7 @@ const AuthPage = () => {
           Sign Up / Login
         </h1>
 
-        {/* ✅ Google Login Button with Image */}
-        {/* Google Login Button */}
+        {/* ✅ Google Login Button */}
         <button
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center bg-white border border-gray-300 py-2 rounded-lg hover:bg-gray-100 transition shadow-md mb-4"
@@ -44,8 +43,6 @@ const AuthPage = () => {
             Sign in with Google
           </span>
         </button>
-
-        {/* ✅ Added `mb-4` to add spacing below the Google button */}
 
         <input
           type="email"
