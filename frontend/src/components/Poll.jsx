@@ -11,69 +11,84 @@ const Poll = ({ pollId }) => {
 
   useEffect(() => {
     const fetchPoll = async () => {
-        if (!pollId) {
-            console.error("❌ Poll ID is missing!");
-            setError("Invalid Poll ID.");
-            setLoading(false);
-            return;
+      if (!pollId) {
+        console.error("❌ Poll ID is missing!");
+        setError("Invalid Poll ID.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const userId = user ? user.uid : null;
+
+        console.log(
+          `🔍 Fetching poll for newsId: ${pollId}, userId: ${userId}`
+        );
+
+        let response = await axios.get(
+          `http://localhost:5001/api/poll/results/${pollId}`,
+          {
+            params: { userId },
+          }
+        );
+
+        if (response.data && response.data.poll) {
+          setPoll(response.data.poll);
+          setSelectedOption(response.data.userVote || null);
+        } else {
+          console.warn("⚠️ No poll found, requesting a new one...");
+
+          // ✅ Request Backend to Generate a New Poll
+          response = await axios.post(
+            `http://localhost:5001/api/poll/generate/${pollId}`
+          );
+
+          if (response.data && response.data.poll) {
+            setPoll(response.data.poll);
+            console.log(
+              `✅ New poll generated: ${response.data.poll.question}`
+            );
+          } else {
+            throw new Error("Poll generation failed.");
+          }
         }
+      } catch (error) {
+        console.error(
+          "❌ Error fetching poll:",
+          error.response?.data || error.message
+        );
 
-        try {
-            const auth = getAuth();
-            const user = auth.currentUser;
-            const userId = user ? user.uid : null;
+        if (error.response && error.response.status === 404) {
+          console.log("⚠️ Poll not found, generating new poll...");
 
-            console.log(`🔍 Fetching poll for newsId: ${pollId}, userId: ${userId}`);
-
-            let response = await axios.get(`http://localhost:5001/api/poll/results/${pollId}`, {
-                params: { userId }
-            });
-
+          try {
+            const response = await axios.post(
+              `http://localhost:5001/api/poll/generate/${pollId}`
+            );
             if (response.data && response.data.poll) {
-                setPoll(response.data.poll);
-                setSelectedOption(response.data.userVote || null);
+              setPoll(response.data.poll);
+              console.log(
+                `✅ New poll created: ${response.data.poll.question}`
+              );
             } else {
-                console.warn("⚠️ No poll found, requesting a new one...");
-                
-                // ✅ Request Backend to Generate a New Poll
-                response = await axios.post(`http://localhost:5001/api/poll/generate/${pollId}`);
-
-                if (response.data && response.data.poll) {
-                    setPoll(response.data.poll);
-                    console.log(`✅ New poll generated: ${response.data.poll.question}`);
-                } else {
-                    throw new Error("Poll generation failed.");
-                }
+              throw new Error("Poll generation failed.");
             }
-        } catch (error) {
-            console.error("❌ Error fetching poll:", error.response?.data || error.message);
-
-            if (error.response && error.response.status === 404) {
-                // ✅ If poll is not found, request to create a new one
-                console.log("⚠️ Poll not found, generating new poll...");
-
-                try {
-                    const response = await axios.post(`http://localhost:5001/api/poll/generate/${pollId}`);
-                    if (response.data && response.data.poll) {
-                        setPoll(response.data.poll);
-                        console.log(`✅ New poll created: ${response.data.poll.question}`);
-                    } else {
-                        throw new Error("Poll generation failed.");
-                    }
-                } catch (generateError) {
-                    console.error("❌ Error generating poll:", generateError);
-                    setError("Failed to generate poll.");
-                }
-            } else {
-                setError("Failed to load poll.");
-            }
-        } finally {
-            setLoading(false);
+          } catch (generateError) {
+            console.error("❌ Error generating poll:", generateError);
+            setError("Failed to generate poll.");
+          }
+        } else {
+          setError("Failed to load poll.");
         }
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchPoll();
-}, [pollId]);
+  }, [pollId]);
 
   // ✅ Handle Voting
   const handleVote = async (option) => {
@@ -81,7 +96,7 @@ const Poll = ({ pollId }) => {
     const user = auth.currentUser;
 
     if (!user) {
-      setShowLoginPrompt(true);
+      setShowLoginPrompt(true); // ✅ Show Login Prompt
       return;
     }
 
@@ -106,6 +121,33 @@ const Poll = ({ pollId }) => {
     }
   };
 
+  // ✅ Show Login Prompt Modal
+  if (showLoginPrompt) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            You need to log in to vote.
+          </h2>
+          <div className="flex justify-between">
+            <button
+              onClick={() => (window.location.href = "/auth")}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => setShowLoginPrompt(false)}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ✅ UI: Loading State
   if (loading) {
     return <p className="text-gray-600 dark:text-gray-300">Loading poll...</p>;
@@ -121,7 +163,7 @@ const Poll = ({ pollId }) => {
   return (
     <div key={pollId} className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
       <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-        {poll?.question || "No Question Available"}
+        {poll?.question.replace(/^"|"$/g, "") || "No Question Available"}
       </h3>
 
       {!selectedOption ? (

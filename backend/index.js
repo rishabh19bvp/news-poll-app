@@ -9,9 +9,11 @@ app.use(cors());
 
 const newsRoutes = require("./routes/newsRoutes");
 const pollRoutes = require("./routes/pollRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 app.use("/api/news", newsRoutes);
 app.use("/api/poll", pollRoutes);
+app.use("/api/user", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("News Poll API is running...");
