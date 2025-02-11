@@ -23,11 +23,16 @@ const Poll = ({ pollId }) => {
         const user = auth.currentUser;
         const userId = user ? user.uid : null;
 
-        console.log(`🔍 Fetching poll for newsId: ${pollId}, userId: ${userId}`);
+        console.log(
+          `🔍 Fetching poll for newsId: ${pollId}, userId: ${userId}`
+        );
 
-        let response = await axios.get(`http://localhost:5001/api/poll/results/${pollId}`, {
-          params: { userId }
-        });
+        let response = await axios.get(
+          `http://localhost:5001/api/poll/results/${pollId}`,
+          {
+            params: { userId },
+          }
+        );
 
         if (response.data && response.data.poll) {
           setPoll(response.data.poll);
@@ -36,26 +41,37 @@ const Poll = ({ pollId }) => {
           console.warn("⚠️ No poll found, requesting a new one...");
 
           // ✅ Request Backend to Generate a New Poll
-          response = await axios.post(`http://localhost:5001/api/poll/generate/${pollId}`);
+          response = await axios.post(
+            `http://localhost:5001/api/poll/generate/${pollId}`
+          );
 
           if (response.data && response.data.poll) {
             setPoll(response.data.poll);
-            console.log(`✅ New poll generated: ${response.data.poll.question}`);
+            console.log(
+              `✅ New poll generated: ${response.data.poll.question}`
+            );
           } else {
             throw new Error("Poll generation failed.");
           }
         }
       } catch (error) {
-        console.error("❌ Error fetching poll:", error.response?.data || error.message);
+        console.error(
+          "❌ Error fetching poll:",
+          error.response?.data || error.message
+        );
 
         if (error.response && error.response.status === 404) {
           console.log("⚠️ Poll not found, generating new poll...");
 
           try {
-            const response = await axios.post(`http://localhost:5001/api/poll/generate/${pollId}`);
+            const response = await axios.post(
+              `http://localhost:5001/api/poll/generate/${pollId}`
+            );
             if (response.data && response.data.poll) {
               setPoll(response.data.poll);
-              console.log(`✅ New poll created: ${response.data.poll.question}`);
+              console.log(
+                `✅ New poll created: ${response.data.poll.question}`
+              );
             } else {
               throw new Error("Poll generation failed.");
             }
@@ -97,7 +113,10 @@ const Poll = ({ pollId }) => {
         setSelectedOption(option);
       }
     } catch (error) {
-      console.error("❌ Error submitting vote:", error.response?.data || error.message);
+      console.error(
+        "❌ Error submitting vote:",
+        error.response?.data || error.message
+      );
       setError("Failed to submit vote.");
     }
   };
@@ -136,13 +155,15 @@ const Poll = ({ pollId }) => {
 
   // ✅ UI: Poll Not Found
   if (!poll) {
-    return <p className="text-red-500">Error: Poll not found or failed to load.</p>;
+    return (
+      <p className="text-red-500">Error: Poll not found or failed to load.</p>
+    );
   }
 
   return (
     <div key={pollId} className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
       <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-        {poll?.question || "No Question Available"}
+        {poll?.question.replace(/^"|"$/g, "") || "No Question Available"}
       </h3>
 
       {!selectedOption ? (
@@ -164,7 +185,10 @@ const Poll = ({ pollId }) => {
         <div className="mt-3">
           <h4 className="text-gray-900 dark:text-gray-100">Poll Results:</h4>
           {Object.entries(poll.options).map(([option, count]) => (
-            <div key={`${poll._id}-${option}`} className="flex justify-between items-center my-1">
+            <div
+              key={`${poll._id}-${option}`}
+              className="flex justify-between items-center my-1"
+            >
               <span className="text-gray-900 dark:text-gray-100">{option}</span>
               <div className="w-48 h-4 bg-gray-300 dark:bg-gray-700 rounded-md">
                 <div
@@ -178,7 +202,9 @@ const Poll = ({ pollId }) => {
                   }}
                 ></div>
               </div>
-              <span className="text-gray-900 dark:text-gray-100">{count} votes</span>
+              <span className="text-gray-900 dark:text-gray-100">
+                {count} votes
+              </span>
             </div>
           ))}
         </div>
