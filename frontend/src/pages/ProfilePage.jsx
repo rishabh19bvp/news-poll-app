@@ -32,7 +32,7 @@ const ProfilePage = () => {
     const fetchUserVotes = async (userId) => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:5001/api/user/votes/${userId}`);
+            const response = await axios.get(`http://103.224.243.142:5001/api/user/votes/${userId}`);
 
             if (response.data && response.data.votes) {
                 setVotes(response.data.votes);

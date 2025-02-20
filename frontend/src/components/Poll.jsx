@@ -28,7 +28,7 @@ const Poll = ({ pollId }) => {
         );
 
         let response = await axios.get(
-          `http://localhost:5001/api/poll/results/${pollId}`,
+          `http://103.224.243.142:5001/api/poll/results/${pollId}`,
           {
             params: { userId },
           }
@@ -42,7 +42,7 @@ const Poll = ({ pollId }) => {
 
           // ✅ Request Backend to Generate a New Poll
           response = await axios.post(
-            `http://localhost:5001/api/poll/generate/${pollId}`
+            `http://103.224.243.142:5001/api/poll/generate/${pollId}`
           );
 
           if (response.data && response.data.poll) {
@@ -65,7 +65,7 @@ const Poll = ({ pollId }) => {
 
           try {
             const response = await axios.post(
-              `http://localhost:5001/api/poll/generate/${pollId}`
+              `http://103.224.243.142:5001/api/poll/generate/${pollId}`
             );
             if (response.data && response.data.poll) {
               setPoll(response.data.poll);
@@ -102,7 +102,7 @@ const Poll = ({ pollId }) => {
 
     try {
       console.log(`🗳️ Submitting vote: ${option}`);
-      const response = await axios.post("http://localhost:5001/api/poll/vote", {
+      const response = await axios.post("http://103.224.243.142:5001/api/poll/vote", {
         pollId: poll._id,
         option,
         userId: user.uid,
