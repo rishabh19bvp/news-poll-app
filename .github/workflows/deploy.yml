@@ -1,0 +1,17 @@
+name: Deploy Python App to EC2 via Docker
+on:
+  push:
+    branches:
+      - bug-fix-poll # Change this if your production branch has a different name
+  workflow_dispatch:
+permissions:
+  id-token: write  # Required for OIDC authentication
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
